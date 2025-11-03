@@ -37,8 +37,12 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
      <input type="text" id="searchInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Folder Here..." required />
   </div>
+  @can('Folder Create')
   <button type="button"  data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Create Folder</button>
+  @endcan
+  @can('File Create')
   <button type="button"  data-modal-target="file-modal" data-modal-toggle="file-modal" class="text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Upload File</button>
+  @endcan
 </br></br>
   {{-- Folder Section --}}
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
@@ -50,13 +54,15 @@
         <p class="text-center text-sm font-medium text-gray-800 truncate w-full">{{ $directory['name'] }}</p>
       </a>
       <div>
-</div>
+    </div>
       </div>
     @empty
       <p class="text-gray-500 text-sm col-span-full text-center">No folders found.</p>
     @endforelse
   </div>
 </br>
+<div style="overflow-x: auto;">
+@if($files->isNotEmpty())
 <table id="search-table" class="dark:text-white">
     <thead>
         <tr>
@@ -96,6 +102,10 @@
       @endforeach
     </tbody>
 </table>
+@else
+      <p class="text-gray-500 text-sm col-span-full text-center">No Files found.</p>
+@endif
+</div>
 </div>
 </div>
 </div>

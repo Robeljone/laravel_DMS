@@ -1,0 +1,70 @@
+      ul { list-style-type: none; padding-left: 20px;}
+      li { margin: 6px 0; }
+      .folder-name { font-weight: 300; }
+      .loader {
+          display: none;
+          text-align: center;
+          padding: 20px;
+      }
+.subfolders {
+  margin-left: 18px;
+}
+
+/* hidden class for visibility control */
+.hidden {
+  display: none;
+}
+/* Each list item (folder) */
+#folder-tree li {
+  list-style: none;
+  margin-top: 6px; /* space between siblings */
+}
+
+/* Subfolders are indented and spaced more clearly */
+#folder-tree ul.subfolders {
+  margin-left: 24px;  /* indentation for sub-levels */
+  margin-top: 6px;    /* space between parent and its subfolder list */
+  border-left: 1px dashed #ccc; /* optional visual guide line */
+  padding-left: 10px;
+}
+
+/* Folder label row */
+.folder-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+  transition: background 0.2s;
+}
+
+/* Highlight label on hover */
+.folder-label:hover {
+  background: #f7f7f7;
+}
+
+/* Toggle icon */
+.toggle-icon {
+  display: inline-block;
+  width: 18px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Hidden subfolders */
+.hidden {
+  display: none;
+}
+
+.subfolders {
+  margin-left: 24px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease, margin-top 0.3s ease;
+}
+
+.subfolders:not(.hidden) {
+  max-height: 1000px; /* large enough to fit nested items */
+  margin-top: 6px;
+}

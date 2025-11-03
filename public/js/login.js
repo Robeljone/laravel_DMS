@@ -1,8 +1,8 @@
 $(document).ready(function () {
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
-    $("#userfrm").submit(function (event) {
+    $("#loginfrm").submit(function (event) {
         event.preventDefault();
-        var form = document.getElementById("userfrm");
+        var form = document.getElementById("loginfrm");
         var formData = new FormData(form);
         $.ajaxSetup({
             beforeSend: function (xhr) {
@@ -10,7 +10,7 @@ $(document).ready(function () {
             },
         });
         $.ajax({
-            url: "/newUser",
+            url: "/login",
             method: "POST",
             data: formData,
             processData: false,
@@ -21,13 +21,12 @@ $(document).ready(function () {
             setTimeout(function() {
             okalert.classList.add('hidden');
             }, 3000);
-                window.location.reload();
+            window.location.href='dashboard';
             },
             error: function (response) {
+            console.log(response);
             const erroralert = document.getElementById('failalert');
             erroralert.classList.remove('hidden');
-            const headingElement = document.getElementById('error');
-            headingElement.textContent = response?.responseJSON?.error;
             setTimeout(function() {
                 erroralert.classList.add('hidden');
             }, 3000);

@@ -1,8 +1,8 @@
 $(document).ready(function () {
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
-    $("#userfrm").submit(function (event) {
+    $("#perfrm").submit(function (event) {
         event.preventDefault();
-        var form = document.getElementById("userfrm");
+        var form = document.getElementById("perfrm");
         var formData = new FormData(form);
         $.ajaxSetup({
             beforeSend: function (xhr) {
@@ -10,7 +10,7 @@ $(document).ready(function () {
             },
         });
         $.ajax({
-            url: "/newUser",
+            url: "/newPermission",
             method: "POST",
             data: formData,
             processData: false,
