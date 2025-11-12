@@ -1,4 +1,11 @@
 $(document).ready(function () {
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.folder-item, .file-item').forEach(item => {
+      const name = item.querySelector('p').innerText.toLowerCase();
+      item.style.display = name.includes(term) ? '' : 'none';
+    });
+  });
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     $("#folderForm").submit(function (event) {
         event.preventDefault();

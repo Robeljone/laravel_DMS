@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 class UserAuth
 {
     /**
@@ -15,8 +16,7 @@ class UserAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $isAuth = $request->session()->get('isAuth');
-        if(!$isAuth)
+        if(!Auth::check())
         {
           return redirect('login');
         }

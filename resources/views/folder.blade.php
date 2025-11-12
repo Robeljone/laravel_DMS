@@ -47,9 +47,8 @@
   {{-- Folder Section --}}
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
     @forelse ($directories as $directory)
-      <div id="folderID">
-      <a href="{{ route('show', ['dir' => $directory['path']]) }}" 
-         class="folder-item bg-white rounded-xl shadow hover:shadow-md p-4 flex flex-col items-center justify-center transition">
+      <div id="folderID" class="folder-item bg-white rounded-xl shadow hover:shadow-md p-4 flex flex-col items-center justify-center transition">
+    <a href="{{ route('show', ['dir' => $directory['path']]) }}" >
         <img src="https://www.iconpacks.net/icons/2/free-folder-icon-1485-thumb.png" class="h-20 me-3" alt="Doc Logo" />
         <p class="text-center text-sm font-medium text-gray-800 truncate w-full">{{ $directory['name'] }}</p>
       </a>

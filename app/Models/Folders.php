@@ -11,7 +11,8 @@ class Folders extends Model
     protected $fillable = [
         'name',
         'path',
-        'parent_id'
+        'parent_id',
+        'status'
     ];
 
     public function childrenRecursive()

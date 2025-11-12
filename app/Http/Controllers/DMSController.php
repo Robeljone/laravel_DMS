@@ -28,11 +28,7 @@ class DMSController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
             if (Hash::check($request->password, $user->password)) {
-                session(['isAuth' => true]);
-                session(['user' => $user]);
-                session(['user_id' => $user->id]);
                 Auth::login($user);
-
                 return response()->json(['message' => 'Login success'], 200, []);
             } else {
                 return response()->json(['message' => 'Login Faild'], 400, []);
@@ -47,8 +43,9 @@ class DMSController extends Controller
     public function logout_user(Request $request)
     {
         try {
-            $request->session()->flush();
-
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             return redirect('login');
         } catch (Exception $e) {
             Log::debug($e->getMessage());
@@ -72,7 +69,7 @@ class DMSController extends Controller
 
     public function index(Request $request)
     {
-        $user_id = $request->session()->get('user_id');
+        $user_id = Auth::id();
         return $this->loadDirectory($user_id);
     }
 
@@ -85,7 +82,7 @@ class DMSController extends Controller
         $r_p = str_replace('/','\\',$dir);
         $directory = "{$base}/{$dir}";
         $sub_dir = 'app/documents\\'.$r_p;
-        $user_id = $request->session()->get('user_id');
+        $user_id = Auth::id();
         $parent_id = Folders::where('path',$sub_dir)->first();
         $folder_acc = $this->get_user_folder($user_id,$parent_id->id);
         $folder_given = [];
@@ -109,9 +106,7 @@ class DMSController extends Controller
                 'name' => basename($path),
                 'path' => str_replace("{$base}/", '', $path),
             ];
-        })->filter(function ($folder) use ($folder_given) {
-            return in_array($folder['name'], $folder_given);
-        })->values();
+        });
 
         $breadcrumb = $this->buildBreadcrumb($dir, $base);
 
@@ -198,7 +193,8 @@ class DMSController extends Controller
             $real_path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $request->current_dir);
             $path = 'app/documents'.$real_path;
             $directory = 'app/documents'.$real_path.'\\'.$request->name;
-            if (! $request->current_dir == '') {
+            if (! $request->current_dir == '') 
+            {
                 $record = Folders::query()->where('path', $path)->first();
                 if ($file->isDirectory(storage_path($directory))) {
                     return response()->json('Folder Name Exit', 400, ['message' => 'success']);
@@ -236,17 +232,36 @@ class DMSController extends Controller
     public function new_file(Request $request)
     {
         $request->validate([
-            'document' => 'required|file|mimes:pdf,doc,docx|max:2048', // Example validation rules
+            'file' => 'required|file|mimes:pdf,doc,docx|max:2048', 
         ]);
         try {
             $request->validate([
                 'file' => 'required|file|mimes:pdf,doc,docx|max:2048',
             ]);
             $file = $request->file('file');
-            $path = 'documents'.$request->current_dir;
-            $file_name = $file->getClientOriginalName();
-            if ($request->hasFile('file')) {
+            $name_dir = str_replace("/","\\",$request->current_dir);
+            $path = "documents".$request->current_dir;
+            $real_path = "app/documents".$name_dir;
+            if($path=='documents')
+            {
+            return response()->json(['message'=>'Upload on Root Dir !'], 200, []);
+            }
+            else
+            {
+             if ($request->hasFile('file')) 
+             {
+                $file_name = $file->getClientOriginalName();
+                $file_ext = $file->getClientOriginalExtension();
                 $request->file('file')->storeAs($path, $file_name);
+                $folder_id = Folders::where('path',$real_path)->where('status',2)->first();
+                DB::table('files_tables')->insert([
+                    'name'=>$file_name,
+                    'extension'=>$file_ext,
+                    'dire_id'=>$folder_id->id,
+                    'dire_path'=>$real_path,
+                    'cuid'=>Auth::id()
+                ]);
+             }
             }
         } catch (Exception $e) {
             Log::debug($e);
@@ -269,7 +284,6 @@ class DMSController extends Controller
                 'status' => 1,
             ]);
             $user_data->assignRole($request->role);
-
             return response()->json([
                 'status' => 200,
                 'message' => 'Success user creation',
@@ -293,7 +307,6 @@ class DMSController extends Controller
                     ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
                     ->where('role_has_permissions.role_id', array_keys($roles))
                     ->pluck('permissions.name');
-
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -304,7 +317,6 @@ class DMSController extends Controller
                 ];
             });
             $roles = DB::select('select * from roles');
-
             return view('users', compact('users', 'roles'));
         } catch (Exception $e) {
             Log::debug($e);
@@ -315,7 +327,6 @@ class DMSController extends Controller
     {
         try {
             $roles = DB::select('select * from roles');
-
             return view('roles', compact('roles'));
         } catch (Exception $e) {
             Log::debug($e->getMessage());
@@ -326,7 +337,6 @@ class DMSController extends Controller
     {
         try {
             $perm = DB::select('select * from permissions');
-
             return view('permission', compact('perm'));
         } catch (Exception $e) {
             Log::debug($e->getMessage());
@@ -340,7 +350,6 @@ class DMSController extends Controller
                 'name' => 'required',
             ]);
             DB::insert('insert into roles (name, guard_name) values (?, ?)', [$request->name, 'web']);
-
             return response()->json([
                 'status' => 200,
                 'message' => 'Success user creation',
@@ -527,6 +536,7 @@ class DMSController extends Controller
             ->with(['folder_list' => function ($q) use ($dir)
             {
                $q->where('parent_id',$dir);
+               $q->where('status',2);
             }])
             ->get()
             ->pluck('folder_list')
